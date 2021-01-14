@@ -10,7 +10,7 @@ class TestRequestProvider(unittest.TestCase):
     @patch('request_provider.requests')
     def test_get_price_sheet_request_url(self, mock_request):
         expected_url = "https://iss.moex.com/cs/engines/stock/markets/shares/boardgroups/57/securities/AFLT.json"
-        expected_till_date = datetime.datetime(2015, 11, 20)
+        expected_till_date = datetime.date(2015, 11, 20)
         get_price_sheet('AFLT', 1000, expected_till_date)
         
         payload = {'s1.type': 'candles', 'interval': '1', 'candles': 1000, 'till': expected_till_date}
@@ -20,7 +20,7 @@ class TestRequestProvider(unittest.TestCase):
     def test_get_price_sheet_timeout(self, mock_request):
         mock_request.get.side_effect = Timeout
         with self.assertRaises(Timeout):
-            get_price_sheet('AFLT', 1000, datetime.datetime(2015, 11, 20))
+            get_price_sheet('AFLT', 1000, datetime.date(2015, 11, 20))
 
     @patch('request_provider.requests')
     def test_get_price_sheet_none_bad_response_codes(self, mock_request):
@@ -30,7 +30,7 @@ class TestRequestProvider(unittest.TestCase):
             response_mock = Mock()
             response_mock.status_code = bad_response_code
             mock_request.get.return_value = response_mock
-            r = get_price_sheet('AFLT', 1000, datetime.datetime(2015, 11, 20))
+            r = get_price_sheet('AFLT', 1000, datetime.date(2015, 11, 20))
             assert r == None
 
     @patch('request_provider.requests')
@@ -40,6 +40,6 @@ class TestRequestProvider(unittest.TestCase):
         mock_request.get.return_value = response_mock
         response_mock.json.return_value = 'json content'
 
-        json = get_price_sheet('AFLT', 1000, datetime.datetime(2015, 11, 20))
+        json = get_price_sheet('AFLT', 1000, datetime.date(2015, 11, 20))
         response_mock.json.assert_called_once()
         assert json == 'json content'

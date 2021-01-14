@@ -32,3 +32,14 @@ class TestRequestProvider(unittest.TestCase):
             mock_request.get.return_value = response_mock
             r = get_price_sheet('AFLT', 1000, datetime.datetime(2015, 11, 20))
             assert r == None
+
+    @patch('request_provider.requests')
+    def test_get_price_sheet_json_on_success(self, mock_request):
+        response_mock = Mock()
+        response_mock.status_code = 200
+        mock_request.get.return_value = response_mock
+        response_mock.json.return_value = 'json content'
+
+        json = get_price_sheet('AFLT', 1000, datetime.datetime(2015, 11, 20))
+        response_mock.json.assert_called_once()
+        assert json == 'json content'

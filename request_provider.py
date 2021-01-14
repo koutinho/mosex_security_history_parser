@@ -5,7 +5,7 @@ def get_price_sheet(stock_name, candle_numbers, till):
     payload = {'s1.type': 'candles', 'interval': '1', 'candles': candle_numbers, 'till': till}
     r = requests.get(url, params = payload)
     
-    if r.status_code ==200:
+    if r.status_code == 200:
         return r.json()
 
     return None

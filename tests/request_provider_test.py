@@ -2,6 +2,8 @@ import unittest
 from request_provider import get_price_sheet
 from requests.exceptions import Timeout
 from unittest.mock import patch
+from unittest.mock import Mock
+from parameterized import parameterized
 import datetime
 
 class TestRequestProvider(unittest.TestCase):
@@ -19,3 +21,14 @@ class TestRequestProvider(unittest.TestCase):
         mock_request.get.side_effect = Timeout
         with self.assertRaises(Timeout):
             get_price_sheet('AFLT', 1000, datetime.datetime(2015, 11, 20))
+
+    @patch('request_provider.requests')
+    def test_get_price_sheet_none_bad_response_codes(self, mock_request):
+        bad_response_codes = [100, 400, 500, 502]
+
+        for bad_response_code in bad_response_codes:
+            response_mock = Mock()
+            response_mock.status_code = bad_response_code
+            mock_request.get.return_value = response_mock
+            r = get_price_sheet('AFLT', 1000, datetime.datetime(2015, 11, 20))
+            assert r == None

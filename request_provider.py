@@ -1,7 +1,7 @@
 import requests
 
 def get_price_sheet(stock_name, candle_numbers, till):
-    url = f'{PRICE_SHEET_URL}/stock_name.json'
+    url = f'{PRICE_SHEET_URL}/{stock_name}.json'
     payload = {'s1.type': 'candles', 'interval': '1', 'candles': candle_numbers, 'till': till}
     r = requests.get(url, params = payload)
     

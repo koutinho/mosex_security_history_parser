@@ -13,3 +13,9 @@ class TestRequestProvider(unittest.TestCase):
         
         payload = {'s1.type': 'candles', 'interval': '1', 'candles': 1000, 'till': expected_till_date}
         mock_request.get.assert_called_once_with(expected_url, params = payload)
+
+    @patch('request_provider.requests')
+    def test_get_price_sheet_timeout(self, mock_request):
+        mock_request.get.side_effect = Timeout
+        with self.assertRaises(Timeout):
+            get_price_sheet('AFLT', 1000, datetime.datetime(2015, 11, 20))

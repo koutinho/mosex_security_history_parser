@@ -16,9 +16,9 @@ def get_price_sheet(stock_name, candle_numbers, till):
 def get_candles(stock_name, date):
     json = get_price_sheet(stock_name, 1000, date + timedelta(days=1))
     json_candles = json['zones'][0]['series'][0]['candles']
-    filtered_candles = filter(lambda x: datetime.fromtimestamp(x['open_time']).date() == date, json_candles)
-    candles = map(lambda x: Candle(x['open'], x['close'], x['open_time'], x['close_time'], x['low'], x['high']), filtered_candles)
-    return candles
+    filtered_candles = filter(lambda x: datetime.fromtimestamp(x['open_time']/1000).date() == date, json_candles)
+    candles = map(lambda x: Candle(x['open'], x['close'], datetime.fromtimestamp(x['open_time']/1000), datetime.fromtimestamp(x['close_time']/1000), x['low'], x['high']), filtered_candles)
+    return list(candles)
 
 
 

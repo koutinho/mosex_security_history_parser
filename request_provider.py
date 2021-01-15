@@ -1,4 +1,7 @@
 import requests
+from datetime import timedelta
+from datetime import datetime
+from candle import Candle
 
 def get_price_sheet(stock_name, candle_numbers, till):
     url = f'{PRICE_SHEET_URL}/{stock_name}.json'
@@ -9,5 +12,14 @@ def get_price_sheet(stock_name, candle_numbers, till):
         return r.json()
 
     return None
+
+def get_candles(stock_name, date):
+    json = get_price_sheet(stock_name, 1000, date + timedelta(days=1))
+    json_candles = json['zones'][0]['series'][0]['candles']
+    filtered_candles = filter(lambda x: datetime.fromtimestamp(x['open_time']).date() == date, json_candles)
+    candles = map(lambda x: Candle(x['open'], x['close'], x['open_time'], x['close_time'], x['low'], x['high']), filtered_candles)
+    return candles
+
+
 
 PRICE_SHEET_URL = "https://iss.moex.com/cs/engines/stock/markets/shares/boardgroups/57/securities"

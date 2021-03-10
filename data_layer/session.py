@@ -4,7 +4,7 @@ from data_layer.base import Base
 from data_layer.candle import Candle
 from data_layer.stock import Stock
 
-engine = create_engine('sqlite:///mosex.db', echo=True)
+engine = create_engine('sqlite:///mosex.db')
 
 Base.metadata.create_all(engine)
 

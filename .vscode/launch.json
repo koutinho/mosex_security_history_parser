@@ -9,7 +9,8 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "args": ["--code", "AFLT", "--description", "Аэрофлот", "--from_year", "2019", "--from_month", "10", "--to_year", "2019", "--to_month", "10", "--log", "INFO"]
         }
     ]
 }

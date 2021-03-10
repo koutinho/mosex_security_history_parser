@@ -1,1 +1,6 @@
 parameterized
+requests
+SQLAlchemy
+requests-futures
+pytest
+pytest-asyncio

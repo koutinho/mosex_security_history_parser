@@ -28,31 +28,26 @@ async def main(argv):
             loglevel = getattr(logging, arg.upper())
             logging.basicConfig(level=loglevel)
 
-    session = Session()
-
-    stock = add_stock_to_db_if_not_exists(session, code, description)
+    stock = add_stock_to_db_if_not_exists(code, description)
 
     from_total_month = from_year * 12 + from_month
     to_total_month = to_year * 12 + to_month
 
-    months_to_parse = [(month // 12, month % 12) for month in range(from_total_month, to_total_month + 1)]
+    months_to_parse = [((month - 1) // 12, ((month - 1) % 12) + 1) for month in range(from_total_month, to_total_month + 1)]
 
     for month in months_to_parse:
         logging.info(f'Удаление свечей для {month[0]}.{month[1]}')
-        delete_stocks(session, month[0], month[1])
+        delete_stocks(month[0], month[1])
 
         logging.info(f'Получение свечей для {month[0]}.{month[1]}')
         candles = await get_candles_for_month(code, month[0], month[1])
-        
-        db_candles = map(lambda x: Candle(x.open_price, x.close_price, x.open_time, x.close_time, x.low, x.high), candles)
-        stock.candles.extend(db_candles)
 
         logging.info(f'Сохранение свечей акций {description} для месяца {month[0]}.{month[1]} в БД')
-        session.commit()
+        add_candles_to_stock(stock, candles)
 
-    session.close()
+def add_stock_to_db_if_not_exists(code, description):
+    session = Session(expire_on_commit=False)
 
-def add_stock_to_db_if_not_exists(session, code, description):
     stock = session.query(Stock).filter(Stock.code == code).first()
 
     if not stock:
@@ -60,14 +55,28 @@ def add_stock_to_db_if_not_exists(session, code, description):
         session.add(stock)
         session.commit()
 
+    session.close()
+
     return stock   
 
-def delete_stocks(session, year, month):
+def delete_stocks(year, month):
+    session = Session()
+
     session.query(Candle).filter(extract('year', Candle.open_time) == year).\
         filter(extract('month', Candle.open_time) == month).\
-            delete(synchronize_session="fetch")
+            delete(synchronize_session=False)
 
     session.commit()
+
+    session.close()
+
+def add_candles_to_stock(stock, candles):
+    session = Session()
+
+    db_candles = map(lambda x: dict(open_price = x.open_price, close_price = x.close_price, open_time = x.open_time, close_time = x.close_time, low = x.low, high = x.high, stock_id = stock.id), candles)
+    session.bulk_insert_mappings(Candle, db_candles)
+
+    session.close()
 
 if __name__ == "__main__":
     asyncio.run(main(sys.argv[1:]))
